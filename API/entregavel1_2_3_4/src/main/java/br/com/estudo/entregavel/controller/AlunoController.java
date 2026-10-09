@@ -2,6 +2,7 @@ package br.com.estudo.entregavel.controller;
 
 import br.com.estudo.entregavel.dto.AlunoRequest;
 import br.com.estudo.entregavel.dto.AlunoResponse;
+import br.com.estudo.entregavel.exception.AlunoNaoEncontradoException;
 import br.com.estudo.entregavel.service.AlunoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -56,20 +57,20 @@ public class AlunoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> atualizar(@PathVariable Long id, @RequestBody AlunoRequest request) {
-        boolean atualizado = alunoService.atualizar(id, request);
-        if (atualizado) {
+        try {
+            alunoService.atualizar(id, request);
             return ResponseEntity.noContent().build();
-        } else {
+        } catch (AlunoNaoEncontradoException exception) {
             return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        boolean excluido = alunoService.excluir(id);
-        if (excluido) {
+        try {
+            alunoService.excluir(id);
             return ResponseEntity.noContent().build();
-        } else {
+        } catch (AlunoNaoEncontradoException exception) {
             return ResponseEntity.notFound().build();
         }
     }

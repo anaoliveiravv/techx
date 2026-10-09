@@ -3,6 +3,7 @@ package br.com.estudo.entregavel.service;
 import br.com.estudo.entregavel.dto.AlunoRequest;
 import br.com.estudo.entregavel.dto.AlunoResponse;
 import br.com.estudo.entregavel.entity.Aluno;
+import br.com.estudo.entregavel.exception.AlunoNaoEncontradoException;
 import br.com.estudo.entregavel.repository.AlunoRepository;
 import org.springframework.stereotype.Service;
 
@@ -54,28 +55,21 @@ public class AlunoService {
         return respostas;
     }
 
-    public boolean atualizar(Long id, AlunoRequest request) {
-        Optional<Aluno> alunoOptional = alunoRepository.findById(id);
-        if (alunoOptional.isPresent()) {
-            Aluno aluno = alunoOptional.get();
-            aluno.setNome(request.getNome());
-            aluno.setIdade(request.getIdade());
-            aluno.setRa(request.getRa());
-            alunoRepository.save(aluno);
-            return true;
-        } else {
-            return false;
-        }
+    public void atualizar(Long id, AlunoRequest request) {
+        Aluno aluno = alunoRepository.findById(id)
+                .orElseThrow(() -> new AlunoNaoEncontradoException(id));
+        aluno.setNome(request.getNome());
+        aluno.setIdade(request.getIdade());
+        aluno.setRa(request.getRa());
+        alunoRepository.save(aluno);
     }
 
-    public boolean excluir(Long id) {
-        Optional<Aluno> alunoOptional = alunoRepository.findById(id);
-        if (alunoOptional.isPresent()) {
-            alunoRepository.delete(alunoOptional.get());
-            return true;
-        } else {
-            return false;
+    public void excluir(Long id) {
+        boolean existe = alunoRepository.existsById(id);
+        if (!existe) {
+            throw new AlunoNaoEncontradoException(id);
         }
+        alunoRepository.deleteById(id);
     }
 
     private AlunoResponse converter(Aluno aluno) {
